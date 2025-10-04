@@ -1,0 +1,77 @@
+# Standard golangci-lint configuration
+run:
+  timeout: 5m
+  tests: true
+  concurrency: 4
+  fix: true  # Auto-fix simple issues like gofmt, goimports when possible
+
+sort-results: true
+
+sort-order:
+  - file
+  - severity
+  - linter
+
+format: text
+
+output:
+  path-mode: "abs"
+  show-stats: true
+
+linters:
+  enable:
+    - errcheck        # Check for unchecked errors
+    - gosimple        # Simplify code
+    - govet           # Official Go suspicious construct checker
+    - ineffassign     # Detect unused assignments
+    - staticcheck     # Go static analysis (combines multiple tools)
+    - typecheck       # Compiler-level type checking
+    - unused          # Find unused variables, constants, functions, etc
+    - gofmt           # Check if code is formatted (gofmt)
+    - goimports       # Check if imports are organized
+    - gosec           # Basic security vulnerability checks
+    - misspell        # Detect English spelling mistakes
+    - revive          # Modern, fast linter for style issues
+    - stylecheck      # Style checker replacing old golint
+    - unconvert       # Remove unnecessary type conversions
+    - unparam         # Find unused function parameters
+    - dupl            # Detect code duplication
+    - gocognit        # Check cognitive complexity of functions
+    - bodyclose       # Check HTTP response body is closed
+    - prealloc        # Suggest preallocation when possible (performance)
+    - nakedret        # Warn if using naked returns (bad for readability)
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+
+  govet:
+    disable-all: true
+    enable:
+      - shadow
+
+  revive:
+    min-confidence: 0.8
+    ignore-generated-header: true
+    severity: warning
+    rules:
+      - name: indent-error-flow
+      - name: error-return
+      - name: var-naming
+      - name: if-return
+      - name: blank-imports
+      - name: range-val-in-closure
+
+  gofmt:
+    simplify: true
+
+  gosec:
+    exclude-generated: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 3
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gosec
