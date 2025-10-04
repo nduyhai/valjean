@@ -1,4 +1,4 @@
-# Makefile for go-module project
+# Makefile for Vajean project
 
 # Go parameters
 GOCMD=go
@@ -11,7 +11,7 @@ GOLINT=golangci-lint
 GOIMPORTS=goimports
 
 # Binary name
-BINARY_NAME=go-module
+BINARY_NAME=Vajean
 
 ## Docker
 DOCKER_IMAGE_NAME=$(BINARY_NAME)-app

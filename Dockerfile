@@ -1,12 +1,12 @@
 # Dockerfile
-ARG APP_NAME=go-module
+ARG APP_NAME=Vajean
 FROM golang:1.24 AS builder
 
 WORKDIR /app
 
 COPY . .
 
-ARG APP_NAME=go-module
+ARG APP_NAME=Vajean
 ENV APP_NAME=${APP_NAME}
 
 RUN go mod download
@@ -16,7 +16,7 @@ FROM alpine
 
 WORKDIR /app
 
-ARG APP_NAME=go-module
+ARG APP_NAME=Vajean
 ENV APP_NAME=${APP_NAME}
 
 COPY --from=builder /app/${APP_NAME} .

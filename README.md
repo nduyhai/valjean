@@ -1,7 +1,7 @@
-# go-module
+# Vajean
 
 [![Go](https://img.shields.io/badge/go-1.24+-blue)](https://go.dev/)
-[![License](https://img.shields.io/github/license/nduyhai/go-module)](LICENSE)
+[![License](https://img.shields.io/github/license/nduyhai/Vajean)](LICENSE)
 
 A GitHub template repository for bootstrapping a new Go project with a clean, idiomatic layout.
 
@@ -16,7 +16,7 @@ A GitHub template repository for bootstrapping a new Go project with a clean, id
 
 ### 📦 Create a New Project
 
-Click the **[Use this template](https://github.com/your-org/go-module/generate)** button to generate a new repository based on this template.
+Click the **[Use this template](https://github.com/your-org/Vajean/generate)** button to generate a new repository based on this template.
 
 ### 🛠️ Customize
 
