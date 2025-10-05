@@ -1,0 +1,90 @@
+package fxmodules
+
+import (
+	"context"
+	"log/slog"
+
+	"github.com/gin-gonic/gin"
+	"github.com/nduyhai/valjean/internal/adapters/http"
+	"github.com/nduyhai/valjean/internal/infra/config"
+	"github.com/nduyhai/valjean/internal/infra/httpserver"
+	"go.uber.org/fx"
+)
+
+var HandlerModule = fx.Module("handlers",
+	fx.Provide(
+		http.NewHandler,
+	),
+)
+
+func NewGinRouter(handler *http.Handler, logger *slog.Logger) *gin.Engine {
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	router.Use(gin.LoggerWithFormatter(func(p gin.LogFormatterParams) string {
+		// bridge Gin logs into slog-style JSON for consistency
+		slog.Info("gin",
+			"method", p.Method,
+			"path", p.Path,
+			"status", p.StatusCode,
+			"latency", p.Latency.String(),
+			"client", p.ClientIP,
+		)
+		return ""
+	}))
+	router.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
+	router.GET("/readyz", func(c *gin.Context) { c.String(200, "ready") })
+	router.POST("/tl/webhook/:token", handler.WebHook)
+
+	return router
+}
+
+func NewHTTPServer(cfg config.Config, router *gin.Engine) *httpserver.Server {
+	return httpserver.New(cfg.HTTP.Port, router)
+}
+
+var HTTPServerModule = fx.Module("http-server",
+	fx.Provide(
+		NewGinRouter,
+		NewHTTPServer,
+	),
+)
+var ServerModule = fx.Options(
+	HandlerModule,
+	HTTPServerModule,
+)
+
+type ServerParams struct {
+	fx.In
+	HTTPServer *httpserver.Server
+}
+
+func ServerLifecycle(lc fx.Lifecycle, servers ServerParams) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			// Start HTTP server
+			go func() {
+				if err := servers.HTTPServer.Start(); err != nil {
+					// Log error but don't stop the application
+					// as this might be expected during shutdown
+				}
+			}()
+
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			// Shutdown HTTP server
+			if err := servers.HTTPServer.Shutdown(ctx); err != nil {
+				// Log error
+			}
+
+			return nil
+		},
+	})
+}
+
+// LifecycleModule provides server lifecycle management
+var LifecycleModule = fx.Module("lifecycle",
+	fx.Invoke(ServerLifecycle),
+)
