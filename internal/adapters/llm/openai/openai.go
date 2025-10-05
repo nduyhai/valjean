@@ -39,7 +39,7 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 	msg := "Please try again"
 
 	if err != nil {
-		c.logger.Error("failed to evaluate", err, "")
+		c.logger.Error("failed to evaluate", slog.Any("error", err))
 		return entities.EvalOutput{
 			Summary: msg,
 		}, err

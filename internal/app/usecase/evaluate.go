@@ -54,20 +54,20 @@ func (e *EvaluateUseCase) Handle(ctx context.Context, in entities.EvalInput) err
 	// rate limit
 	ok, _ := e.RateLimiter.Allow(ctx, rlKey(in), 1)
 	if !ok {
-		e.Logger.Error("rate limit exceeded", nil, "")
+		e.Logger.Warn("rate limit exceeded")
 		return errors.New("cooling down—try again in a moment")
 	}
 	// moderation
 	allowed, reason := e.Moderation.Allowed(ctx, in.Text)
 	if !allowed {
-		e.Logger.Error("message skipped", nil, "")
+		e.Logger.Warn("message skipped")
 		return errors.New("Message skipped (" + reason + ")")
 	}
 	// normalize text (trim trigger)
 	in.Text = stripTriggers(in.Text, e.Telegram)
 	out, err := e.Evaluator.Evaluate(ctx, in)
 	if err != nil || out.Summary == "" {
-		e.Logger.Error("failed to evaluate", err, "")
+		e.Logger.Error("failed to evaluate", slog.Any("error", err))
 		return errors.New("i couldn’t evaluate that right now")
 	}
 

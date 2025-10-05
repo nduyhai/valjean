@@ -23,7 +23,7 @@ func (t *Telegram) Publish(ctx context.Context, event entities.Event) {
 
 	_, err := t.bot.Send(message)
 	if err != nil {
-		t.logger.Error("failed to send message: ", err, "")
+		t.logger.Error("failed to send message: ", slog.Any("error", err))
 	}
 
 }

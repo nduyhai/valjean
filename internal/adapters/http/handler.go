@@ -30,14 +30,14 @@ func (h *Handler) WebHook(c *gin.Context) {
 	token := c.Param("token")
 	if token != h.config.Telegram.WebhookSecret {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-		h.logger.Error("invalid token", nil, "")
+		h.logger.Error("invalid token")
 		return
 	}
 
 	var upd tgbotapi.Update
 	if err := c.ShouldBindJSON(&upd); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
-		h.logger.Error("invalid payload", err, "")
+		h.logger.Warn("invalid payload")
 		return
 	}
 
