@@ -22,11 +22,19 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 	ctxTimeout, cancelFunc := context.WithTimeout(ctx, 10*time.Second)
 	defer cancelFunc()
 
+	var messages []goopenai.ChatCompletionMessageParamUnion
+
+	for _, contextText := range in.ContextSnips {
+		if contextText != "" {
+			messages = append(messages, goopenai.UserMessage(contextText))
+		}
+	}
+
+	messages = append(messages, goopenai.UserMessage(in.Text))
+
 	chatCompletion, err := c.ai.Chat.Completions.New(ctxTimeout, goopenai.ChatCompletionNewParams{
-		Messages: []goopenai.ChatCompletionMessageParamUnion{
-			goopenai.UserMessage(in.Text),
-		},
-		Model: goopenai.ChatModelGPT4o,
+		Messages: messages,
+		Model:    goopenai.ChatModelGPT4o,
 	})
 	msg := "Please try again"
 

@@ -19,7 +19,11 @@ type Handler struct {
 }
 
 func NewHandler(evaluator *usecase.EvaluateUseCase, logger *slog.Logger, config config.Config) *Handler {
-	return &Handler{evaluator: evaluator, logger: logger, config: config}
+	return &Handler{
+		evaluator: evaluator,
+		logger:    logger,
+		config:    config,
+	}
 }
 
 func (h *Handler) WebHook(c *gin.Context) {
@@ -38,13 +42,19 @@ func (h *Handler) WebHook(c *gin.Context) {
 	}
 
 	h.logger.Info("received message:", upd.Message.Text, "")
+
+	var contextSnips []string
+	if upd.Message.ReplyToMessage != nil && upd.Message.ReplyToMessage.Text != "" {
+		contextSnips = []string{upd.Message.ReplyToMessage.Text}
+	}
+
 	err := h.evaluator.Handle(c.Request.Context(), entities.EvalInput{
 		ChatID:       upd.Message.Chat.ID,
 		MessageID:    upd.Message.MessageID,
 		UserID:       upd.Message.From.ID,
 		UserHandle:   upd.Message.From.UserName,
 		Text:         upd.Message.Text,
-		ContextSnips: nil,
+		ContextSnips: contextSnips,
 	})
 	if err != nil {
 		return
