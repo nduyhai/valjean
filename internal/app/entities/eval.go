@@ -7,6 +7,8 @@ type EvalInput struct {
 	UserHandle   string
 	Text         string
 	ContextSnips []string // optional evidence
+	ChatType     string
+	ReplyFor     string
 }
 
 type EvalOutput struct {

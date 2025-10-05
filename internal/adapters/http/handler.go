@@ -41,6 +41,9 @@ func (h *Handler) WebHook(c *gin.Context) {
 		return
 	}
 
+	if upd.Message == nil || upd.Message.Chat == nil {
+		return
+	}
 	h.logger.Info("received message:", upd.Message.Text, "")
 
 	var contextSnips []string
@@ -48,15 +51,34 @@ func (h *Handler) WebHook(c *gin.Context) {
 		contextSnips = []string{upd.Message.ReplyToMessage.Text}
 	}
 
-	err := h.evaluator.Handle(c.Request.Context(), entities.EvalInput{
+	evalInput := entities.EvalInput{
 		ChatID:       upd.Message.Chat.ID,
 		MessageID:    upd.Message.MessageID,
 		UserID:       upd.Message.From.ID,
 		UserHandle:   upd.Message.From.UserName,
 		Text:         upd.Message.Text,
 		ContextSnips: contextSnips,
-	})
+		ChatType:     upd.Message.Chat.Type,
+		ReplyFor:     h.getReplyUserName(upd),
+	}
+
+	shouldHandle := h.evaluator.ShouldHandle(c.Request.Context(), evalInput)
+
+	if !shouldHandle {
+		return
+	}
+
+	err := h.evaluator.Handle(c.Request.Context(), evalInput)
 	if err != nil {
 		return
 	}
+}
+
+func (h *Handler) getReplyUserName(upd tgbotapi.Update) string {
+	replyUserName := ""
+	if upd.Message.ReplyToMessage != nil &&
+		upd.Message.ReplyToMessage.From != nil {
+		replyUserName = upd.Message.ReplyToMessage.From.UserName
+	}
+	return replyUserName
 }

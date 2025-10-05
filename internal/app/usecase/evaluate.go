@@ -29,8 +29,8 @@ func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation
 
 }
 
-func (e *EvaluateUseCase) ShouldHandle(ctx context.Context, text string) bool {
-	text = strings.TrimSpace(text)
+func (e *EvaluateUseCase) ShouldHandle(ctx context.Context, in entities.EvalInput) bool {
+	text := strings.TrimSpace(in.Text)
 	if e.Telegram.Prefix != "" && strings.HasPrefix(text, e.Telegram.Prefix) {
 		return true
 	}
@@ -38,6 +38,15 @@ func (e *EvaluateUseCase) ShouldHandle(ctx context.Context, text string) bool {
 		strings.Contains(text, "@"+e.Telegram.BotUsername) {
 		return true
 	}
+
+	if in.ReplyFor == e.Telegram.BotUsername {
+		return true
+	}
+
+	if in.ChatType == "private" {
+		return true
+	}
+
 	return false
 }
 
