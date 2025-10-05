@@ -5,6 +5,7 @@ import "github.com/nduyhai/xcore/config/envloader"
 type Config struct {
 	HTTP     HTTPConfig
 	Telegram Telegram
+	OpenAI   OpenAI
 }
 
 type HTTPConfig struct {
@@ -17,6 +18,10 @@ type Telegram struct {
 	BotUsername    string `env:"TELEGRAM_BOT_USERNAME" envDefault:"valjean"`
 	Token          string `env:"TELEGRAM_BOT_TOKEN"`
 	WebhookSecret  string `env:"TELEGRAM_WEBHOOK_SECRET"`
+}
+
+type OpenAI struct {
+	Key string `env:"OPENAI_KEY" envDefault:""`
 }
 
 func Load() Config {

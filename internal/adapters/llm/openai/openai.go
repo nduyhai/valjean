@@ -2,26 +2,46 @@ package openai
 
 import (
 	"context"
-	"net/http"
+	"log/slog"
+	"time"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
+	goopenai "github.com/openai/openai-go/v3"
 )
 
 type Client struct {
-	HTTP  *http.Client
-	Model string
-	URL   string // e.g. https://api.openai.com/v1/chat/completions
+	ai     goopenai.Client
+	logger *slog.Logger
 }
 
-func NewClient() *Client {
-	return &Client{}
-
+func NewClient(ai goopenai.Client, logger *slog.Logger) *Client {
+	return &Client{ai: ai, logger: logger}
 }
 
 func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.EvalOutput, error) {
+	ctxTimeout, cancelFunc := context.WithTimeout(ctx, 10*time.Second)
+	defer cancelFunc()
 
+	chatCompletion, err := c.ai.Chat.Completions.New(ctxTimeout, goopenai.ChatCompletionNewParams{
+		Messages: []goopenai.ChatCompletionMessageParamUnion{
+			goopenai.UserMessage(in.Text),
+		},
+		Model: goopenai.ChatModelGPT4o,
+	})
+	msg := "Please try again"
+
+	if err != nil {
+		c.logger.Error("failed to evaluate", err, "")
+		return entities.EvalOutput{
+			Summary: msg,
+		}, err
+	}
+
+	if length := len(chatCompletion.Choices); length > 0 {
+		msg = chatCompletion.Choices[0].Message.Content
+	}
 	return entities.EvalOutput{
-		Summary:    "Summary",
+		Summary:    msg,
 		Citations:  []string{"Citation"},
 		Confidence: 80,
 	}, nil

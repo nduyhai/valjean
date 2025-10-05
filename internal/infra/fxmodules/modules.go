@@ -12,6 +12,8 @@ import (
 	"github.com/nduyhai/valjean/internal/app/usecase"
 	"github.com/nduyhai/valjean/internal/infra/config"
 	"github.com/nduyhai/valjean/internal/ports"
+	goopenai "github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 	"go.uber.org/fx"
 )
 
@@ -37,14 +39,22 @@ var UseCaseModule = fx.Module("usecases",
 var LimiterModule = fx.Module("adapters",
 	fx.Provide(
 		fx.Annotate(limiter.NewMemory, fx.As(new(ports.RateLimiter))),
+		NewOpenAISdk,
 		fx.Annotate(openai.NewClient, fx.As(new(ports.Evaluator))),
-		NewBot,
+		NewTelegramSdk,
 		fx.Annotate(producer.NewTelegram, fx.As(new(ports.EventProducer))),
 	),
 )
 
-func NewBot(config config.Config) (*tgbotapi.BotAPI, error) {
+func NewTelegramSdk(config config.Config) (*tgbotapi.BotAPI, error) {
 	return tgbotapi.NewBotAPI(config.Telegram.Token)
+}
+
+func NewOpenAISdk(config config.Config) goopenai.Client {
+	ai := goopenai.NewClient(
+		option.WithAPIKey(config.OpenAI.Key), // defaults to os.LookupEnv("OPENAI_API_KEY")
+	)
+	return ai
 }
 
 var ApplicationModule = fx.Module("application",
