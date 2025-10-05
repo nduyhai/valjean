@@ -40,3 +40,13 @@ Edit the README.md, package names, and other placeholders as needed.
 make run
 ```
 
+### Setup Webhook 
+
+```shell
+# Deploy this service over HTTPS (Cloud Run / Hetzner + Caddy/NGINX).
+# Then point Telegram to the secret path:
+curl -X POST \
+ "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=https://YOUR.DOMAIN/telegram/webhook/$WEBHOOK_SECRET"
+
+```
+

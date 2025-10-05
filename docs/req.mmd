@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant TG as Telegram
+    participant Web as Webhook Server (:8080)
+    participant App as UseCase: EvaluateMsg
+    participant LLM as LLM Client
+    participant MCP as MCP Client
+
+    TG->>Web: POST /webhook (Update)
+    Web->>App: HandleUpdate(update)
+    App->>App: Gate (mention/@bot or prefix: !eval)
+    App->>App: RateLimit & Moderation check
+    alt Engine = LLM
+        App->>LLM: Analyze(message)
+        LLM-->>App: summary/eval
+    else Engine = MCP
+        App->>MCP: call tools (search/eval)
+        MCP-->>App: tool results
+    else Engine = Hybrid
+        App->>MCP: context snippets
+        MCP-->>App: evidence
+        App->>LLM: Synthesize(evidence + msg)
+        LLM-->>App: final answer
+    end
+    App-->>Web: reply text
+    Web-->>TG: sendMessage
