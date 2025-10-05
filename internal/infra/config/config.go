@@ -13,11 +13,10 @@ type HTTPConfig struct {
 }
 
 type Telegram struct {
-	RequireMention bool   `env:"TELEGRAM_REQUIRED_MENTION" envDefault:"true"`
-	Prefix         string `env:"TELEGRAM_PREFIX" envDefault:"!eval"` // "!eval "
-	BotUsername    string `env:"TELEGRAM_BOT_USERNAME" envDefault:"valjean"`
-	Token          string `env:"TELEGRAM_BOT_TOKEN"`
-	WebhookSecret  string `env:"TELEGRAM_WEBHOOK_SECRET"`
+	Prefix        string `env:"TELEGRAM_PREFIX" envDefault:"!eval"` // "!eval "
+	BotUsername   string `env:"TELEGRAM_BOT_USERNAME" envDefault:"valjean"`
+	Token         string `env:"TELEGRAM_BOT_TOKEN"`
+	WebhookSecret string `env:"TELEGRAM_WEBHOOK_SECRET"`
 }
 
 type OpenAI struct {

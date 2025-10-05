@@ -70,6 +70,7 @@ func (h *Handler) WebHook(c *gin.Context) {
 
 	err := h.evaluator.Handle(c.Request.Context(), evalInput)
 	if err != nil {
+		h.logger.Error("failed to handle message: ", slog.Any("error", err))
 		return
 	}
 }

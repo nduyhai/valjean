@@ -34,7 +34,7 @@ func (e *EvaluateUseCase) ShouldHandle(ctx context.Context, in entities.EvalInpu
 	if e.Telegram.Prefix != "" && strings.HasPrefix(text, e.Telegram.Prefix) {
 		return true
 	}
-	if e.Telegram.RequireMention && e.Telegram.BotUsername != "" &&
+	if e.Telegram.BotUsername != "" &&
 		strings.Contains(text, "@"+e.Telegram.BotUsername) {
 		return true
 	}
