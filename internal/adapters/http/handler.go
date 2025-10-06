@@ -27,29 +27,16 @@ func NewHandler(evaluator *usecase.EvaluateUseCase, logger *slog.Logger, config 
 }
 
 func (h *Handler) WebHook(c *gin.Context) {
-	token := c.Param("token")
-	if token != h.config.Telegram.WebhookSecret {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-		h.logger.Error("invalid token")
+	if !h.validateToken(c) {
 		return
 	}
 
-	var upd tgbotapi.Update
-	if err := c.ShouldBindJSON(&upd); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
-		h.logger.Warn("invalid payload")
+	upd, ok := h.parseAndValidateUpdate(c)
+	if !ok {
 		return
 	}
 
-	if upd.Message == nil || upd.Message.Chat == nil {
-		return
-	}
 	h.logger.Info("received message:", upd.Message.Text, "")
-
-	var contextSnips []string
-	if upd.Message.ReplyToMessage != nil && upd.Message.ReplyToMessage.Text != "" {
-		contextSnips = []string{upd.Message.ReplyToMessage.Text}
-	}
 
 	evalInput := entities.EvalInput{
 		ChatID:       upd.Message.Chat.ID,
@@ -57,7 +44,7 @@ func (h *Handler) WebHook(c *gin.Context) {
 		UserID:       upd.Message.From.ID,
 		UserHandle:   upd.Message.From.UserName,
 		Text:         upd.Message.Text,
-		ContextSnips: contextSnips,
+		ContextSnips: h.extractContextSnips(upd),
 		ChatType:     upd.Message.Chat.Type,
 		ReplyFor:     h.getReplyUserName(upd),
 	}
@@ -75,6 +62,29 @@ func (h *Handler) WebHook(c *gin.Context) {
 	}
 }
 
+func (h *Handler) validateToken(c *gin.Context) bool {
+	token := c.Param("token")
+	if token != h.config.Telegram.WebhookSecret {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		h.logger.Error("invalid token")
+		return false
+	}
+	return true
+}
+
+func (h *Handler) parseAndValidateUpdate(c *gin.Context) (tgbotapi.Update, bool) {
+	var upd tgbotapi.Update
+	if err := c.ShouldBindJSON(&upd); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		h.logger.Warn("invalid payload")
+		return upd, false
+	}
+	if upd.Message == nil || upd.Message.Chat == nil {
+		return upd, false
+	}
+	return upd, true
+}
+
 func (h *Handler) getReplyUserName(upd tgbotapi.Update) string {
 	replyUserName := ""
 	if upd.Message.ReplyToMessage != nil &&
@@ -82,4 +92,11 @@ func (h *Handler) getReplyUserName(upd tgbotapi.Update) string {
 		replyUserName = upd.Message.ReplyToMessage.From.UserName
 	}
 	return replyUserName
+}
+
+func (h *Handler) extractContextSnips(upd tgbotapi.Update) []string {
+	if upd.Message.ReplyToMessage != nil && upd.Message.ReplyToMessage.Text != "" {
+		return []string{upd.Message.ReplyToMessage.Text}
+	}
+	return nil
 }
