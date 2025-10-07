@@ -49,12 +49,6 @@ func (h *Handler) WebHook(c *gin.Context) {
 		ReplyFor:     h.getReplyUserName(upd),
 	}
 
-	shouldHandle := h.evaluator.ShouldHandle(c.Request.Context(), evalInput)
-
-	if !shouldHandle {
-		return
-	}
-
 	err := h.evaluator.Handle(c.Request.Context(), evalInput)
 	if err != nil {
 		h.logger.Error("failed to handle message: ", slog.Any("error", err))

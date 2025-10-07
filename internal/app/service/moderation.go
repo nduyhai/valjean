@@ -1,18 +1,42 @@
 package service
 
-import "context"
+import (
+	"context"
+	"strings"
+
+	"github.com/nduyhai/valjean/internal/app/entities"
+	"github.com/nduyhai/valjean/internal/infra/config"
+)
 
 type Moderation interface {
-	Allowed(ctx context.Context, text string) (bool, string) // ok, reason
+	Allowed(ctx context.Context, in entities.EvalInput) bool // ok, reason
 }
 
 type moderation struct {
+	telegram config.Telegram
 }
 
-func NewModeration() Moderation {
-	return &moderation{}
+func NewModeration(config config.Config) Moderation {
+	return &moderation{telegram: config.Telegram}
 }
 
-func (m *moderation) Allowed(ctx context.Context, text string) (bool, string) {
-	return true, ""
+func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
+	text := strings.TrimSpace(in.Text)
+	if m.telegram.Prefix != "" && strings.HasPrefix(text, m.telegram.Prefix) {
+		return true
+	}
+	if m.telegram.BotUsername != "" &&
+		strings.Contains(text, "@"+m.telegram.BotUsername) {
+		return true
+	}
+
+	if in.ReplyFor == m.telegram.BotUsername {
+		return true
+	}
+
+	if in.ChatType == "private" {
+		return true
+	}
+
+	return false
 }
