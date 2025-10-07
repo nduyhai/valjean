@@ -32,7 +32,7 @@ func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation
 		eventProducer: eventProducer,
 		worker:        worker,
 		telegram:      config.Telegram,
-		cooldown:      5 * time.Second,
+		cooldown:      60 * time.Second,
 		logger:        logger,
 	}
 
