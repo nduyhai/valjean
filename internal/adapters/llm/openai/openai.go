@@ -3,7 +3,6 @@ package openai
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
 	goopenai "github.com/openai/openai-go/v3"
@@ -19,27 +18,32 @@ func NewClient(ai goopenai.Client, logger *slog.Logger) *Client {
 }
 
 func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.EvalOutput, error) {
-	ctxTimeout, cancelFunc := context.WithTimeout(ctx, 10*time.Second)
-	defer cancelFunc()
 
-	var messages []goopenai.ChatCompletionMessageParamUnion
-
-	for _, contextText := range in.ContextSnips {
-		if contextText != "" {
-			messages = append(messages, goopenai.UserMessage(contextText))
+	// Combine context snippets with the main message
+	var fullMessage string
+	if len(in.ContextSnips) > 0 {
+		fullMessage = "Context:\n"
+		for _, contextText := range in.ContextSnips {
+			if contextText != "" {
+				fullMessage += contextText + "\n"
+			}
 		}
+		fullMessage += "\nUser message:\n" + in.Text
+	} else {
+		fullMessage = in.Text
 	}
 
-	messages = append(messages, goopenai.UserMessage(in.Text))
+	messages := []goopenai.ChatCompletionMessageParamUnion{
+		goopenai.UserMessage(fullMessage),
+	}
 
-	chatCompletion, err := c.ai.Chat.Completions.New(ctxTimeout, goopenai.ChatCompletionNewParams{
+	chatCompletion, err := c.ai.Chat.Completions.New(ctx, goopenai.ChatCompletionNewParams{
 		Messages: messages,
 		Model:    goopenai.ChatModelGPT4o,
 	})
-	msg := "Please try again"
 
+	msg := "Please try again"
 	if err != nil {
-		c.logger.Error("failed to evaluate", slog.Any("error", err))
 		return entities.EvalOutput{
 			Summary: msg,
 		}, err

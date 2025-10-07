@@ -2,11 +2,14 @@ package service
 
 import (
 	"context"
+	"slices"
 	"strings"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
 	"github.com/nduyhai/valjean/internal/infra/config"
 )
+
+const PrivateChat = "private"
 
 type Moderation interface {
 	Allowed(ctx context.Context, in entities.EvalInput) bool // ok, reason
@@ -22,6 +25,15 @@ func NewModeration(config config.Config) Moderation {
 
 func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
 	text := strings.TrimSpace(in.Text)
+
+	if len(m.telegram.BlockedUsers) > 0 && slices.Contains(m.telegram.BlockedUsers, in.UserHandle) {
+		return false
+	}
+
+	if len(m.telegram.AllowedUsers) > 0 && !slices.Contains(m.telegram.AllowedUsers, in.UserHandle) {
+		return false
+	}
+
 	if m.telegram.Prefix != "" && strings.HasPrefix(text, m.telegram.Prefix) {
 		return true
 	}
@@ -34,7 +46,7 @@ func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
 		return true
 	}
 
-	if in.ChatType == "private" {
+	if in.ChatType == PrivateChat {
 		return true
 	}
 

@@ -18,13 +18,23 @@ type EvaluateUseCase struct {
 	moderation    service.Moderation
 	rateLimiter   ports.RateLimiter
 	eventProducer ports.EventProducer
+	worker        ports.Worker
 	telegram      config.Telegram
 	cooldown      time.Duration
 	logger        *slog.Logger
 }
 
-func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation, rateLimiter ports.RateLimiter, eventProducer ports.EventProducer, config config.Config, logger *slog.Logger) *EvaluateUseCase {
-	return &EvaluateUseCase{evaluator: evaluator, moderation: moderation, rateLimiter: rateLimiter, eventProducer: eventProducer, telegram: config.Telegram, cooldown: 2 * time.Second, logger: logger}
+func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation, rateLimiter ports.RateLimiter, eventProducer ports.EventProducer, worker ports.Worker, config config.Config, logger *slog.Logger) *EvaluateUseCase {
+	return &EvaluateUseCase{
+		evaluator:     evaluator,
+		moderation:    moderation,
+		rateLimiter:   rateLimiter,
+		eventProducer: eventProducer,
+		worker:        worker,
+		telegram:      config.Telegram,
+		cooldown:      60 * time.Second,
+		logger:        logger,
+	}
 
 }
 
@@ -38,11 +48,23 @@ func (e *EvaluateUseCase) Handle(ctx context.Context, in entities.EvalInput) err
 
 		return errors.New("cooling down—try again in a moment")
 	}
+
+	e.worker.Submit(func() {
+		e.process(in)
+	})
+
+	return nil
+}
+
+func (e *EvaluateUseCase) process(in entities.EvalInput) {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), e.cooldown)
+	defer cancelFunc()
+
 	// moderation
 	allowed := e.moderation.Allowed(ctx, in)
 	if !allowed {
 		e.logger.Warn("message skipped")
-		return errors.New("message skipped")
+		return
 	}
 	out, err := e.evaluator.Evaluate(ctx, in)
 	if err != nil || out.Summary == "" {
@@ -51,12 +73,10 @@ func (e *EvaluateUseCase) Handle(ctx context.Context, in entities.EvalInput) err
 
 		e.sendMsg(ctx, in, "i couldn’t evaluate that right now")
 
-		return errors.New("i couldn’t evaluate that right now")
+		return
 	}
 
 	e.sendMsg(ctx, in, out.Summary)
-
-	return nil
 }
 
 func (e *EvaluateUseCase) sendMsg(ctx context.Context, in entities.EvalInput, replyMsg string) {
