@@ -20,6 +20,7 @@ func NewTelegram(bot *tgbotapi.BotAPI, logger *slog.Logger) *Telegram {
 func (t *Telegram) Publish(ctx context.Context, event entities.Event) {
 
 	message := tgbotapi.NewMessage(event.ChatID, event.ReplyMessage)
+	message.ReplyToMessageID = event.OriginalMessageId
 
 	_, err := t.bot.Send(message)
 	if err != nil {

@@ -33,6 +33,9 @@ func (e *EvaluateUseCase) Handle(ctx context.Context, in entities.EvalInput) err
 	ok, _ := e.rateLimiter.Allow(ctx, rlKey(in), 1)
 	if !ok {
 		e.logger.Warn("rate limit exceeded")
+
+		e.sendMsg(ctx, in, "cooling down—try again in a moment")
+
 		return errors.New("cooling down—try again in a moment")
 	}
 	// moderation
@@ -43,16 +46,25 @@ func (e *EvaluateUseCase) Handle(ctx context.Context, in entities.EvalInput) err
 	}
 	out, err := e.evaluator.Evaluate(ctx, in)
 	if err != nil || out.Summary == "" {
+
 		e.logger.Error("failed to evaluate", slog.Any("error", err))
+
+		e.sendMsg(ctx, in, "i couldn’t evaluate that right now")
+
 		return errors.New("i couldn’t evaluate that right now")
 	}
 
+	e.sendMsg(ctx, in, out.Summary)
+
+	return nil
+}
+
+func (e *EvaluateUseCase) sendMsg(ctx context.Context, in entities.EvalInput, replyMsg string) {
 	e.eventProducer.Publish(ctx, entities.Event{
 		ChatID:            in.ChatID,
 		OriginalMessageId: in.MessageID,
-		ReplyMessage:      out.Summary,
+		ReplyMessage:      replyMsg,
 	})
-	return nil
 }
 
 func rlKey(in entities.EvalInput) string {
