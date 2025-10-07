@@ -54,8 +54,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/nduyhai/xcore/config/envloader v1.0.1 h1:8D+dtcWJ1XKcpgYnM4ioHQQY5yXKBpJkf0dt2Ne1nVQ=
 github.com/nduyhai/xcore/config/envloader v1.0.1/go.mod h1:PuqkzytqAnrEtyt+QnW9M372nnx4n2568KRq2FrHNms=
-github.com/openai/openai-go/v3 v3.1.0 h1:sBf6OYL6Pj1qMAkQEmkz8r8z+EBes+iI7gCuCgr8e/A=
-github.com/openai/openai-go/v3 v3.1.0/go.mod h1:UOpNxkqC9OdNXNUfpNByKOtB4jAL0EssQXq5p8gO0Xs=
+github.com/openai/openai-go/v3 v3.2.0 h1:2AbqFUCsoW2pm/2pUtPRuwK89dnoGHaQokzWsfoQO/U=
+github.com/openai/openai-go/v3 v3.2.0/go.mod h1:UOpNxkqC9OdNXNUfpNByKOtB4jAL0EssQXq5p8gO0Xs=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
