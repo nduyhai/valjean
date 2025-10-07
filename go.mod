@@ -8,9 +8,11 @@ require (
 	github.com/nduyhai/xcore/config/envloader v1.0.1
 	github.com/openai/openai-go/v3 v3.1.0
 	go.uber.org/fx v1.24.0
+	go.uber.org/ratelimit v0.3.1
 )
 
 require (
+	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect

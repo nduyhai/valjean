@@ -138,6 +138,70 @@ valjean/
 
 ## 🛠️ Development
 
+### Setting
+
+```shell
+# set webhook
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://YOUR.DOMAIN/telegram/webhook/SECRET",
+    "secret_token": "YOUR_HEADER_SECRET"
+  }'
+
+# check
+curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getWebhookInfo" | jq
+
+# delete
+curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/deleteWebhook"
+
+
+# global commands
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "commands": [
+      {"command":"eval","description":"Analyze a replied message or text"},
+      {"command":"help","description":"How to use this bot"}
+    ]
+  }'
+
+# restrict to all group chats
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "commands":[{"command":"eval","description":"Analyze a replied message or text"}],
+    "scope":{"type":"all_group_chats"}
+  }'
+
+
+# name
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyName" \
+  -d "name=Valjean"
+
+# short description (shown in profiles)
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyShortDescription" \
+  --data-urlencode "short_description=Reply-and-tag me to analyze messages."
+
+# long description (shown on /start)
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyDescription" \
+  --data-urlencode "description=I analyze the message you replied to when you tag me in groups."
+
+
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyDefaultAdministratorRights" \
+  -H "Content-Type: application/json" \
+  -d '{"rights":{"can_delete_messages":true,"can_manage_topics":true},"for_channels":false}'
+
+
+curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setChatMenuButton" \
+  -H "Content-Type: application/json" \
+  -d '{"menu_button":{"type":"commands"}}'
+
+```
+
+Group Privacy Mode (ON/OFF) → must use @BotFather → Bot Settings → Group Privacy → Turn off
+(Required if you want the bot to trigger on mentions like @YourBot.)
+
 ### Running Tests
 ```bash
 make test
