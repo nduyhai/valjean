@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"slices"
 	"strings"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
@@ -22,6 +23,15 @@ func NewModeration(config config.Config) Moderation {
 
 func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
 	text := strings.TrimSpace(in.Text)
+
+	if len(m.telegram.BlockedUsers) > 0 && slices.Contains(m.telegram.BlockedUsers, in.UserHandle) {
+		return false
+	}
+
+	if len(m.telegram.AllowedUsers) > 0 && !slices.Contains(m.telegram.AllowedUsers, in.UserHandle) {
+		return false
+	}
+
 	if m.telegram.Prefix != "" && strings.HasPrefix(text, m.telegram.Prefix) {
 		return true
 	}
