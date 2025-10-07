@@ -9,6 +9,8 @@ import (
 	"github.com/nduyhai/valjean/internal/infra/config"
 )
 
+const PrivateChat = "private"
+
 type Moderation interface {
 	Allowed(ctx context.Context, in entities.EvalInput) bool // ok, reason
 }
@@ -44,7 +46,7 @@ func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
 		return true
 	}
 
-	if in.ChatType == "private" {
+	if in.ChatType == PrivateChat {
 		return true
 	}
 
