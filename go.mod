@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/alitto/pond/v2 v2.5.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect

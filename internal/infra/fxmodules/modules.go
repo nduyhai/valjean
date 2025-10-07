@@ -8,6 +8,7 @@ import (
 	"github.com/nduyhai/valjean/internal/adapters/limiter"
 	"github.com/nduyhai/valjean/internal/adapters/llm/openai"
 	"github.com/nduyhai/valjean/internal/adapters/producer"
+	"github.com/nduyhai/valjean/internal/adapters/worker"
 	"github.com/nduyhai/valjean/internal/app/service"
 	"github.com/nduyhai/valjean/internal/app/usecase"
 	"github.com/nduyhai/valjean/internal/infra/config"
@@ -43,6 +44,7 @@ var LimiterModule = fx.Module("adapters",
 		fx.Annotate(openai.NewClient, fx.As(new(ports.Evaluator))),
 		NewTelegramSdk,
 		fx.Annotate(producer.NewTelegram, fx.As(new(ports.EventProducer))),
+		fx.Annotate(worker.NewMemory, fx.As(new(ports.Worker))),
 	),
 )
 

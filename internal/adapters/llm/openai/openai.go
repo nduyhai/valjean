@@ -36,10 +36,9 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 		Messages: messages,
 		Model:    goopenai.ChatModelGPT4o,
 	})
-	msg := "Please try again"
 
+	msg := "Please try again"
 	if err != nil {
-		c.logger.Error("failed to evaluate", slog.Any("error", err))
 		return entities.EvalOutput{
 			Summary: msg,
 		}, err

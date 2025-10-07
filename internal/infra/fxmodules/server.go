@@ -8,6 +8,7 @@ import (
 	"github.com/nduyhai/valjean/internal/adapters/http"
 	"github.com/nduyhai/valjean/internal/infra/config"
 	"github.com/nduyhai/valjean/internal/infra/httpserver"
+	"github.com/nduyhai/valjean/internal/ports"
 	"go.uber.org/fx"
 )
 
@@ -58,6 +59,7 @@ var ServerModule = fx.Options(
 type ServerParams struct {
 	fx.In
 	HTTPServer *httpserver.Server
+	Worker     ports.Worker
 }
 
 func ServerLifecycle(lc fx.Lifecycle, servers ServerParams) {
@@ -78,6 +80,8 @@ func ServerLifecycle(lc fx.Lifecycle, servers ServerParams) {
 			if err := servers.HTTPServer.Shutdown(ctx); err != nil {
 				// Log error
 			}
+
+			servers.Worker.Shutdown()
 
 			return nil
 		},
