@@ -48,7 +48,7 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 
 	// 3) Messages: short system + one user
 	messages := []goopenai.ChatCompletionMessageParamUnion{
-		goopenai.SystemMessage("You are concise. If uncertain, say so briefly."),
+		goopenai.SystemMessage("You are concise. Answer ≤400 words. If uncertain, say so briefly."),
 		goopenai.UserMessage(userPrompt),
 	}
 
@@ -56,8 +56,8 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 	chatCompletion, err := c.ai.Chat.Completions.New(ctx, goopenai.ChatCompletionNewParams{
 		Messages:    messages,
 		Model:       goopenai.ChatModelGPT4oMini, // cheaper than 4o
-		MaxTokens:   goopenai.Int(120),           // cap output tokens
-		Temperature: goopenai.Float(0.2),
+		MaxTokens:   goopenai.Int(400),           // cap output tokens
+		Temperature: goopenai.Float(0.4),
 	})
 
 	msg := "Please try again"
