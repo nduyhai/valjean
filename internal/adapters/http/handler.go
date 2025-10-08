@@ -3,8 +3,6 @@ package http
 import (
 	"log/slog"
 	"net/http"
-	"regexp"
-	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/nduyhai/valjean/internal/infra/config"
