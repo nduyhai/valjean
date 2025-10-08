@@ -45,7 +45,7 @@ func (h *Handler) WebHook(c *gin.Context) {
 		MessageID:    upd.Message.MessageID,
 		UserID:       upd.Message.From.ID,
 		UserHandle:   upd.Message.From.UserName,
-		Text:         h.cleanMention(upd.Message.Text, h.config.Telegram.BotUsername),
+		Text:         upd.Message.Text,
 		ContextSnips: h.extractContextSnips(upd),
 		ChatType:     upd.Message.Chat.Type,
 		ReplyFor:     h.getReplyUserName(upd),
@@ -95,14 +95,4 @@ func (h *Handler) extractContextSnips(upd tgbotapi.Update) []string {
 		return []string{upd.Message.ReplyToMessage.Text}
 	}
 	return nil
-}
-
-func (h *Handler) cleanMention(text, botUsername string) string {
-	if text == "" || botUsername == "" {
-		return text
-	}
-	re := regexp.MustCompile(`(?i)@` + regexp.QuoteMeta(botUsername) + `\b`)
-	cleaned := re.ReplaceAllString(text, "")
-	cleaned = strings.TrimSpace(strings.Join(strings.Fields(cleaned), " "))
-	return cleaned
 }
