@@ -34,9 +34,6 @@ func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
 		return false
 	}
 
-	if m.telegram.Prefix != "" && strings.HasPrefix(text, m.telegram.Prefix) {
-		return true
-	}
 	if m.telegram.BotUsername != "" &&
 		strings.Contains(text, "@"+m.telegram.BotUsername) {
 		return true
