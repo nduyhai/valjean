@@ -48,7 +48,7 @@ func (c *Client) Evaluate(ctx context.Context, in entities.EvalInput) (entities.
 
 	// 3) Messages: short system + one user
 	messages := []goopenai.ChatCompletionMessageParamUnion{
-		goopenai.SystemMessage("You are concise. Answer ≤60 words. If uncertain, say so briefly."),
+		goopenai.SystemMessage("You are concise. Answer ≤300 words. If uncertain, say so briefly."),
 		goopenai.UserMessage(userPrompt),
 	}
 
