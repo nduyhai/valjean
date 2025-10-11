@@ -50,7 +50,6 @@ TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_BOT_USERNAME=your_bot_username
 TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 TELEGRAM_REQUIRED_MENTION=true
-TELEGRAM_PREFIX=!eval
 
 # Zalo Configuration
 ZALO_BOT_TOKEN=your_zalo_oa_token
@@ -105,9 +104,8 @@ curl -X POST "https://openapi.zalo.me/v3.0/oa/webhook" \
 The bot responds to messages in several ways:
 
 1. **Direct Mention**: `@your_bot_username Hello!`
-2. **Prefix Command**: `!eval What is the weather like?`
-3. **Reply to Bot**: Reply to any bot message for continued conversation
-4. **Private Messages**: All messages in private chats
+2. **Reply to Bot**: Reply to any bot message for continued conversation
+3. **Private Messages**: All messages in private chats
 
 Zalo Official Account subscribers are supported through the configured webhook and receive the same evaluation experience.
 
@@ -117,8 +115,6 @@ Zalo Official Account subscribers are supported through the configured webhook a
 User: @valjean What is artificial intelligence?
 Bot: Artificial intelligence (AI) refers to the simulation of human intelligence...
 
-User: !eval Explain quantum computing
-Bot: Quantum computing is a revolutionary computing paradigm...
 ```
 
 ## 🏗️ Project Structure
@@ -154,7 +150,6 @@ valjean/
 | `TELEGRAM_BOT_USERNAME` | `valjean` | Bot username for mentions |
 | `TELEGRAM_WEBHOOK_SECRET` | - | Secret for webhook security |
 | `TELEGRAM_REQUIRED_MENTION` | `true` | Require @mention in groups |
-| `TELEGRAM_PREFIX` | `!eval` | Command prefix trigger |
 | `OPENAI_KEY` | - | OpenAI API key |
 | `ZALO_BOT_TOKEN` | - | Zalo Official Account access token |
 | `ZALO_BOT_USERNAME` | `valjean` | Display name used for Zalo responses |
@@ -183,25 +178,6 @@ curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getWebhookInfo" | jq
 curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/deleteWebhook"
 
 
-# global commands
-curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "commands": [
-      {"command":"eval","description":"Analyze a replied message or text"},
-      {"command":"help","description":"How to use this bot"}
-    ]
-  }'
-
-# restrict to all group chats
-curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "commands":[{"command":"eval","description":"Analyze a replied message or text"}],
-    "scope":{"type":"all_group_chats"}
-  }'
-
-
 # name
 curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyName" \
   -d "name=Valjean"
@@ -214,15 +190,6 @@ curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyShortDescr
 curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyDescription" \
   --data-urlencode "description=I analyze the message you replied to when you tag me in groups."
 
-
-curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyDefaultAdministratorRights" \
-  -H "Content-Type: application/json" \
-  -d '{"rights":{"can_delete_messages":true,"can_manage_topics":true},"for_channels":false}'
-
-
-curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setChatMenuButton" \
-  -H "Content-Type: application/json" \
-  -d '{"menu_button":{"type":"commands"}}'
 
 ```
 
