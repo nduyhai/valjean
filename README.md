@@ -3,7 +3,7 @@
 [![Go](https://img.shields.io/badge/go-1.24+-blue)](https://go.dev/)
 [![License](https://img.shields.io/github/license/nduyhai/valjean)](LICENSE)
 
-A smart Telegram bot powered by OpenAI that provides AI-powered conversation and evaluation capabilities with context awareness, rate limiting, and content moderation.
+A smart Telegram & Zalo bot powered by OpenAI that provides AI-powered conversation and evaluation capabilities with context awareness, rate limiting, and content moderation.
 
 ## ✨ Features
 
@@ -14,6 +14,7 @@ A smart Telegram bot powered by OpenAI that provides AI-powered conversation and
 - 📱 **Flexible Triggers**: Responds to mentions, prefixes, or direct replies
 - 🏗️ **Clean Architecture**: Uses dependency injection with Uber FX
 - 🚀 **Webhook Support**: Efficient real-time message processing
+- 🌐 **Multi-Channel**: Unified handling for Telegram and Zalo conversations
 - ⚡ **High Performance**: Concurrent message handling with proper synchronization
 
 ## 🚀 Getting Started
@@ -22,6 +23,7 @@ A smart Telegram bot powered by OpenAI that provides AI-powered conversation and
 
 - Go 1.24 or higher
 - Telegram Bot Token (from [@BotFather](https://t.me/botfather))
+- Zalo Official Account token and webhook secret
 - OpenAI API Key
 
 ### 📦 Installation
@@ -49,6 +51,11 @@ TELEGRAM_BOT_USERNAME=your_bot_username
 TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 TELEGRAM_REQUIRED_MENTION=true
 TELEGRAM_PREFIX=!eval
+
+# Zalo Configuration
+ZALO_BOT_TOKEN=your_zalo_oa_token
+ZALO_BOT_USERNAME=your_zalo_display_name
+ZALO_WEBHOOK_SECRET=your_zalo_webhook_secret
 
 # OpenAI Configuration
 OPENAI_KEY=your_openai_api_key
@@ -80,6 +87,19 @@ curl -X POST \
  "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=https://YOUR.DOMAIN/telegram/webhook/$WEBHOOK_SECRET"
 ```
 
+Configure the Zalo webhook with the `/zl/webhook` endpoint:
+
+```bash
+curl -X POST "https://openapi.zalo.me/v3.0/oa/webhook" \
+  -H "access_token: $ZALO_BOT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "oaid": "YOUR_OFFICIAL_ACCOUNT_ID",
+    "callback_url": "https://YOUR.DOMAIN/zl/webhook",
+    "secret_key": "YOUR_WEBHOOK_SECRET"
+  }'
+```
+
 ## 🎯 Usage
 
 The bot responds to messages in several ways:
@@ -88,6 +108,8 @@ The bot responds to messages in several ways:
 2. **Prefix Command**: `!eval What is the weather like?`
 3. **Reply to Bot**: Reply to any bot message for continued conversation
 4. **Private Messages**: All messages in private chats
+
+Zalo Official Account subscribers are supported through the configured webhook and receive the same evaluation experience.
 
 ### Example Conversations
 
@@ -109,7 +131,7 @@ valjean/
 │   │   ├── http/              # HTTP handlers
 │   │   ├── llm/openai/        # OpenAI client
 │   │   ├── limiter/           # Rate limiting
-│   │   └── producer/telegram/ # Telegram message producer
+│   │   └── producer/          # Message producers for Telegram & Zalo
 │   ├── app/                   # Business logic
 │   │   ├── entities/          # Domain entities
 │   │   ├── service/           # Domain services
@@ -134,6 +156,11 @@ valjean/
 | `TELEGRAM_REQUIRED_MENTION` | `true` | Require @mention in groups |
 | `TELEGRAM_PREFIX` | `!eval` | Command prefix trigger |
 | `OPENAI_KEY` | - | OpenAI API key |
+| `ZALO_BOT_TOKEN` | - | Zalo Official Account access token |
+| `ZALO_BOT_USERNAME` | `valjean` | Display name used for Zalo responses |
+| `ZALO_WEBHOOK_SECRET` | - | Secret for validating Zalo webhook requests |
+| `ZALO_BLOCKED_USERS` | - | Optional list of blocked Zalo user IDs |
+| `ZALO_ALLOWED_USERS` | - | Optional list of allowed Zalo user IDs |
 | `HTTP_PORT` | `8080` | HTTP server port |
 
 ## 🛠️ Development
