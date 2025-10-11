@@ -6,6 +6,8 @@ import (
 	"github.com/nduyhai/valjean/internal/app/entities"
 )
 
-type EventProducer interface {
+type ChannelEventProducer interface {
 	Publish(ctx context.Context, event entities.Event)
+
+	Supported() entities.SourceType
 }

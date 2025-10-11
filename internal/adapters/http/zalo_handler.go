@@ -4,29 +4,25 @@ import (
 	"log/slog"
 	"net/http"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nduyhai/valjean/internal/infra/config"
-
 	"github.com/gin-gonic/gin"
+	"github.com/nduyhai/go-zalo-bot-api/endpoints"
+
 	"github.com/nduyhai/valjean/internal/app/entities"
 	"github.com/nduyhai/valjean/internal/app/usecase"
+	"github.com/nduyhai/valjean/internal/infra/config"
 )
 
-type Handler struct {
+type ZaloHandler struct {
 	evaluator *usecase.EvaluateUseCase
 	logger    *slog.Logger
 	config    config.Config
 }
 
-func NewHandler(evaluator *usecase.EvaluateUseCase, logger *slog.Logger, config config.Config) *Handler {
-	return &Handler{
-		evaluator: evaluator,
-		logger:    logger,
-		config:    config,
-	}
+func NewZaloHandler(evaluator *usecase.EvaluateUseCase, logger *slog.Logger, config config.Config) *ZaloHandler {
+	return &ZaloHandler{evaluator: evaluator, logger: logger, config: config}
 }
 
-func (h *Handler) WebHook(c *gin.Context) {
+func (h *ZaloHandler) WebHook(c *gin.Context) {
 	if !h.validateToken(c) {
 		return
 	}
@@ -39,13 +35,14 @@ func (h *Handler) WebHook(c *gin.Context) {
 	h.logger.Info("received message:", upd.Message.Text, "")
 
 	evalInput := entities.EvalInput{
+		SourceType:   entities.SourceZalo,
 		ChatID:       upd.Message.Chat.ID,
 		MessageID:    upd.Message.MessageID,
 		UserID:       upd.Message.From.ID,
-		UserHandle:   upd.Message.From.UserName,
-		Text:         upd.Message.Text,
+		UserHandle:   upd.Message.From.DisplayName,
+		Text:         h.getMessageText(upd),
 		ContextSnips: h.extractContextSnips(upd),
-		ChatType:     upd.Message.Chat.Type,
+		ChatType:     upd.Message.Chat.ChatType,
 		ReplyFor:     h.getReplyUserName(upd),
 	}
 
@@ -56,9 +53,16 @@ func (h *Handler) WebHook(c *gin.Context) {
 	}
 }
 
-func (h *Handler) validateToken(c *gin.Context) bool {
-	token := c.Param("token")
-	if token != h.config.Telegram.WebhookSecret {
+func (h *ZaloHandler) getMessageText(upd endpoints.UpdateResult) string {
+	if upd.EventName == endpoints.EventMessageTextReceived {
+		return upd.Message.Text
+	}
+	return ""
+}
+
+func (h *ZaloHandler) validateToken(c *gin.Context) bool {
+	token := c.GetHeader(string(endpoints.HeaderSecretToken))
+	if token != h.config.Zalo.WebhookSecret {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		h.logger.Error("invalid token")
 		return false
@@ -66,8 +70,8 @@ func (h *Handler) validateToken(c *gin.Context) bool {
 	return true
 }
 
-func (h *Handler) parseAndValidateUpdate(c *gin.Context) (tgbotapi.Update, bool) {
-	var upd tgbotapi.Update
+func (h *ZaloHandler) parseAndValidateUpdate(c *gin.Context) (endpoints.UpdateResult, bool) {
+	var upd endpoints.UpdateResult
 	if err := c.ShouldBindJSON(&upd); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
 		h.logger.Warn("invalid payload")
@@ -79,18 +83,12 @@ func (h *Handler) parseAndValidateUpdate(c *gin.Context) (tgbotapi.Update, bool)
 	return upd, true
 }
 
-func (h *Handler) getReplyUserName(upd tgbotapi.Update) string {
-	replyUserName := ""
-	if upd.Message.ReplyToMessage != nil &&
-		upd.Message.ReplyToMessage.From != nil {
-		replyUserName = upd.Message.ReplyToMessage.From.UserName
-	}
-	return replyUserName
+func (h *ZaloHandler) getReplyUserName(upd endpoints.UpdateResult) string {
+	//TODO: not support yet
+	return ""
 }
 
-func (h *Handler) extractContextSnips(upd tgbotapi.Update) []string {
-	if upd.Message.ReplyToMessage != nil && upd.Message.ReplyToMessage.Text != "" {
-		return []string{upd.Message.ReplyToMessage.Text}
-	}
+func (h *ZaloHandler) extractContextSnips(upd endpoints.UpdateResult) []string {
+	//TODO: not support yet
 	return nil
 }

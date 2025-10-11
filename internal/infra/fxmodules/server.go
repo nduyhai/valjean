@@ -14,18 +14,24 @@ import (
 
 var HandlerModule = fx.Module("handlers",
 	fx.Provide(
-		http.NewHandler,
+		http.NewTelegramHandler,
+		http.NewZaloHandler,
 	),
 )
 
-func NewGinRouter(handler *http.Handler, logger *slog.Logger) *gin.Engine {
+type HandlerParams struct {
+	fx.In
+	Telegram *http.TelegramHandler
+	Zalo     *http.ZaloHandler
+}
+
+func NewGinRouter(handlers HandlerParams, logger *slog.Logger) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
 	router.Use(gin.LoggerWithFormatter(func(p gin.LogFormatterParams) string {
-		// bridge Gin logs into slog-style JSON for consistency
-		slog.Info("gin",
+		logger.Info("gin",
 			"method", p.Method,
 			"path", p.Path,
 			"status", p.StatusCode,
@@ -36,7 +42,9 @@ func NewGinRouter(handler *http.Handler, logger *slog.Logger) *gin.Engine {
 	}))
 	router.GET("/healthz", func(c *gin.Context) { c.String(200, "ok") })
 	router.GET("/readyz", func(c *gin.Context) { c.String(200, "ready") })
-	router.POST("/tl/webhook/:token", handler.WebHook)
+
+	router.POST("/tl/webhook/:token", handlers.Telegram.WebHook)
+	router.POST("/zl/webhook", handlers.Zalo.WebHook)
 
 	return router
 }

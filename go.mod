@@ -3,16 +3,17 @@ module github.com/nduyhai/valjean
 go 1.25.0
 
 require (
+	github.com/alitto/pond/v2 v2.5.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/nduyhai/go-zalo-bot-api v1.0.3
 	github.com/nduyhai/xcore/config/envloader v1.0.1
-	github.com/openai/openai-go/v3 v3.2.0
+	github.com/openai/openai-go/v3 v3.3.0
 	go.uber.org/fx v1.24.0
 	go.uber.org/ratelimit v0.3.1
 )
 
 require (
-	github.com/alitto/pond/v2 v2.5.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
