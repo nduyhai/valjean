@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"slices"
-	"strings"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
 	"github.com/nduyhai/valjean/internal/infra/config"
@@ -15,43 +13,28 @@ type Moderation interface {
 	Allowed(ctx context.Context, in entities.EvalInput) bool // ok, reason
 }
 
+type moderationStrategy interface {
+	Allowed(ctx context.Context, in entities.EvalInput) bool
+}
+
 type moderation struct {
-	telegram config.Telegram
+	strategies map[entities.SourceType]moderationStrategy
 }
 
 func NewModeration(config config.Config) Moderation {
-	return &moderation{telegram: config.Telegram}
+	return &moderation{
+		strategies: map[entities.SourceType]moderationStrategy{
+			entities.SourceTelegram: newTelegramModeration(config.Telegram),
+			entities.SourceZalo:     newZaloModeration(config.Zalo),
+		},
+	}
 }
 
 func (m *moderation) Allowed(ctx context.Context, in entities.EvalInput) bool {
-	if in.SourceType == entities.SourceTelegram {
-		text := strings.TrimSpace(in.Text)
-
-		if len(m.telegram.BlockedUsers) > 0 && slices.Contains(m.telegram.BlockedUsers, in.UserHandle) {
-			return false
-		}
-
-		if len(m.telegram.AllowedUsers) > 0 && !slices.Contains(m.telegram.AllowedUsers, in.UserHandle) {
-			return false
-		}
-
-		if m.telegram.BotUsername != "" &&
-			strings.Contains(text, "@"+m.telegram.BotUsername) {
-			return true
-		}
-
-		if in.ReplyFor == m.telegram.BotUsername {
-			return true
-		}
-
-		if in.ChatType == PrivateChat {
-			return true
-		}
-
+	strategy, ok := m.strategies[in.SourceType]
+	if !ok {
 		return false
-	} else if in.SourceType == entities.SourceZalo {
-		return true
 	}
 
-	return false
+	return strategy.Allowed(ctx, in)
 }
