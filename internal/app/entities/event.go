@@ -1,7 +1,8 @@
 package entities
 
 type Event struct {
-	ChatID            int64
-	OriginalMessageId int
+	SourceType        SourceType
+	ChatID            string
+	OriginalMessageId string
 	ReplyMessage      string
 }

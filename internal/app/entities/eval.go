@@ -1,9 +1,17 @@
 package entities
 
+type SourceType string
+
+const (
+	SourceTelegram SourceType = "telegram"
+	SourceZalo     SourceType = "zalo"
+)
+
 type EvalInput struct {
-	ChatID       int64
-	MessageID    int
-	UserID       int64
+	SourceType   SourceType
+	ChatID       string
+	MessageID    string
+	UserID       string
 	UserHandle   string
 	Text         string
 	ContextSnips []string // optional evidence

@@ -4,10 +4,12 @@ import (
 	"log/slog"
 	"os"
 
+	zalobotapi "github.com/nduyhai/go-zalo-bot-api"
+	"github.com/nduyhai/valjean/internal/adapters/producer"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/nduyhai/valjean/internal/adapters/limiter"
 	"github.com/nduyhai/valjean/internal/adapters/llm/openai"
-	"github.com/nduyhai/valjean/internal/adapters/producer"
 	"github.com/nduyhai/valjean/internal/adapters/worker"
 	"github.com/nduyhai/valjean/internal/app/service"
 	"github.com/nduyhai/valjean/internal/app/usecase"
@@ -37,14 +39,16 @@ var UseCaseModule = fx.Module("usecases",
 	),
 )
 
-var LimiterModule = fx.Module("adapters",
+var AdaptersModule = fx.Module("adapters",
 	fx.Provide(
 		fx.Annotate(limiter.NewMemory, fx.As(new(ports.RateLimiter))),
 		NewOpenAISdk,
 		fx.Annotate(openai.NewClient, fx.As(new(ports.Evaluator))),
 		NewTelegramSdk,
-		fx.Annotate(producer.NewTelegram, fx.As(new(ports.EventProducer))),
+		fx.Annotate(producer.NewTelegram, fx.As(new(ports.ChannelEventProducer)), fx.ResultTags(`group:"channels"`)),
 		fx.Annotate(worker.NewMemory, fx.As(new(ports.Worker))),
+		NewZaloSdk,
+		fx.Annotate(producer.NewZalo, fx.As(new(ports.ChannelEventProducer)), fx.ResultTags(`group:"channels"`)),
 	),
 )
 
@@ -52,6 +56,12 @@ func NewTelegramSdk(config config.Config) (*tgbotapi.BotAPI, error) {
 	return tgbotapi.NewBotAPI(config.Telegram.Token)
 }
 
+func NewZaloSdk(config config.Config, logger *slog.Logger) *zalobotapi.Client {
+	slogLogger := zalobotapi.NewSlogLogger(logger)
+
+	cli := zalobotapi.New(config.Zalo.Token, zalobotapi.WithLogger(slogLogger), zalobotapi.WithUserAgent(config.Zalo.BotUsername))
+	return cli
+}
 func NewOpenAISdk(config config.Config) goopenai.Client {
 	ai := goopenai.NewClient(
 		option.WithAPIKey(config.OpenAI.Key), // defaults to os.LookupEnv("OPENAI_API_KEY")
@@ -62,12 +72,13 @@ func NewOpenAISdk(config config.Config) goopenai.Client {
 var ApplicationModule = fx.Module("application",
 	fx.Provide(
 		service.NewModeration,
+		fx.Annotate(service.NewEventProducer, fx.ParamTags(`group:"channels"`)),
 	),
 )
 
 var AllModules = fx.Options(
 	ConfigModule,
-	LimiterModule,
+	AdaptersModule,
 	UseCaseModule,
 	ApplicationModule,
 )

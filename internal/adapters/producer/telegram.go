@@ -3,6 +3,7 @@ package producer
 import (
 	"context"
 	"log/slog"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/nduyhai/valjean/internal/app/entities"
@@ -13,14 +14,20 @@ type Telegram struct {
 	logger *slog.Logger
 }
 
+func (t *Telegram) Supported() entities.SourceType {
+	return entities.SourceTelegram
+}
+
 func NewTelegram(bot *tgbotapi.BotAPI, logger *slog.Logger) *Telegram {
 	return &Telegram{bot: bot, logger: logger}
 }
 
 func (t *Telegram) Publish(ctx context.Context, event entities.Event) {
+	messageId, _ := strconv.Atoi(event.OriginalMessageId)
+	chatId, _ := strconv.ParseInt(event.ChatID, 10, 64)
 
-	message := tgbotapi.NewMessage(event.ChatID, event.ReplyMessage)
-	message.ReplyToMessageID = event.OriginalMessageId
+	message := tgbotapi.NewMessage(chatId, event.ReplyMessage)
+	message.ReplyToMessageID = messageId
 
 	_, err := t.bot.Send(message)
 	if err != nil {

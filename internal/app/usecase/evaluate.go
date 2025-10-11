@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"strconv"
 	"time"
 
 	"github.com/nduyhai/valjean/internal/app/entities"
@@ -17,14 +16,14 @@ type EvaluateUseCase struct {
 	evaluator     ports.Evaluator
 	moderation    service.Moderation
 	rateLimiter   ports.RateLimiter
-	eventProducer ports.EventProducer
+	eventProducer service.EventProducer
 	worker        ports.Worker
 	telegram      config.Telegram
 	cooldown      time.Duration
 	logger        *slog.Logger
 }
 
-func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation, rateLimiter ports.RateLimiter, eventProducer ports.EventProducer, worker ports.Worker, config config.Config, logger *slog.Logger) *EvaluateUseCase {
+func NewEvaluateUseCase(evaluator ports.Evaluator, moderation service.Moderation, rateLimiter ports.RateLimiter, eventProducer service.EventProducer, worker ports.Worker, config config.Config, logger *slog.Logger) *EvaluateUseCase {
 	return &EvaluateUseCase{
 		evaluator:     evaluator,
 		moderation:    moderation,
@@ -81,6 +80,7 @@ func (e *EvaluateUseCase) process(in entities.EvalInput) {
 
 func (e *EvaluateUseCase) sendMsg(ctx context.Context, in entities.EvalInput, replyMsg string) {
 	e.eventProducer.Publish(ctx, entities.Event{
+		SourceType:        in.SourceType,
 		ChatID:            in.ChatID,
 		OriginalMessageId: in.MessageID,
 		ReplyMessage:      replyMsg,
@@ -88,5 +88,5 @@ func (e *EvaluateUseCase) sendMsg(ctx context.Context, in entities.EvalInput, re
 }
 
 func rlKey(in entities.EvalInput) string {
-	return "rl:user:" + strconv.Itoa(int(in.UserID))
+	return "rl:platform" + string(in.SourceType) + "rl:user:" + in.UserID
 }
