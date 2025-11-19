@@ -28,6 +28,7 @@ func (t *Telegram) Publish(ctx context.Context, event entities.Event) {
 
 	message := tgbotapi.NewMessage(chatId, event.ReplyMessage)
 	message.ReplyToMessageID = messageId
+	message.ParseMode = tgbotapi.ModeMarkdownV2
 
 	_, err := t.bot.Send(message)
 	if err != nil {
