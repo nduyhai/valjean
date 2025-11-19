@@ -26,7 +26,8 @@ func (t *Telegram) Publish(ctx context.Context, event entities.Event) {
 	messageId, _ := strconv.Atoi(event.OriginalMessageId)
 	chatId, _ := strconv.ParseInt(event.ChatID, 10, 64)
 
-	message := tgbotapi.NewMessage(chatId, event.ReplyMessage)
+	safe := tgbotapi.EscapeText(tgbotapi.ModeMarkdownV2, event.ReplyMessage)
+	message := tgbotapi.NewMessage(chatId, safe)
 	message.ReplyToMessageID = messageId
 	message.ParseMode = tgbotapi.ModeMarkdownV2
 
