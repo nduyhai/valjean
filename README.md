@@ -1,6 +1,6 @@
 # Valjean
 
-[![Go](https://img.shields.io/badge/go-1.24+-blue)](https://go.dev/)
+[![Go](https://img.shields.io/badge/go-1.26+-blue)](https://go.dev/)
 [![License](https://img.shields.io/github/license/nduyhai/valjean)](LICENSE)
 
 A smart Telegram & Zalo bot powered by OpenAI that provides AI-powered conversation and evaluation capabilities with context awareness, rate limiting, and content moderation.
