@@ -3,7 +3,7 @@ module github.com/nduyhai/valjean
 go 1.26.0
 
 require (
-	github.com/alitto/pond/v2 v2.7.0
+	github.com/alitto/pond/v2 v2.7.1
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/nduyhai/go-zalo-bot-api v1.0.3
