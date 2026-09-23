@@ -8,7 +8,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/nduyhai/go-zalo-bot-api v1.0.3
 	github.com/nduyhai/xcore/config/envloader v1.0.1
-	github.com/openai/openai-go/v3 v3.61.0
+	github.com/openai/openai-go/v3 v3.64.0
 	go.uber.org/fx v1.24.0
 	go.uber.org/ratelimit v0.3.1
 )
@@ -20,6 +20,7 @@ require (
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/caarlos0/env/v11 v11.3.1 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/coder/websocket v1.8.15 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
